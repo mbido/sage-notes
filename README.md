@@ -6,6 +6,8 @@ Here is the structure of that notes :
 ```sh 
 $ tree
 .
+├── personal-implem
+│   └── xgcd.sage
 ├── prof-implem
 │   ├── binary_tree.sage
 │   ├── divrem_via_series.sage
@@ -20,5 +22,5 @@ $ tree
 │   └── subproduct_tree.sage
 └── README.md
 
-2 directories, 12 files
+3 directories, 13 files
 ```
