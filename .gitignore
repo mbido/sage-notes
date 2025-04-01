@@ -1,0 +1,2 @@
+# all python files that are a compiled version of the sage files 
+*.sage.py
