@@ -12,11 +12,24 @@ def distincts_elements(n, field):
             l.append(x)
     return l
 
+# returns n nonzero random elements in field
+# requires field to be large enough
+def nonzero_elements(n, field):
+    l = []
+    while len(l) < n :
+        x = field.random_element()
+        if x != 0:
+            l.append(x)
+    return l
+
+def is_leaf(spt):
+    return not(spt.left_tree) and not(spt.right_tree)
+
 # leaves of the remainder tree constructed from the root of spt and its derivative
 # Note: we don't care about building the tree, we just want to retrieve the leaves
 def leaves_rmt(dpol, spt):
     root = dpol.quo_rem(spt.data)[1]
-    if root.degree() <= 0:
+    if (root.degree() <= 0) and (is_leaf(spt)):
         # base case: leaf
         return [root.constant_coefficient()]
 
@@ -55,7 +68,7 @@ def partialsum_tree(x_pts, y_pts, rmt_leaves, pring=None):
     x = pring.gen()
 
     # build leaves of partial sum tree
-    pst_leaves = [BTree( (y/l) / (x-pt) ) for pt, y, l in zip(x_pts, y_pts, rmt_leaves)]
+    pst_leaves = [BTree((y/l) / (x-pt)) for pt, y, l in zip(x_pts, y_pts, rmt_leaves)]
 
     # construct and return whole subproduct tree
     return construct_pst(pst_leaves)
@@ -69,12 +82,9 @@ def interpolation(x_pts, y_pts):
     # step 2: compute remainder tree
     da = derivative(spt.data)
     leaves = leaves_rmt(da, spt)
-    #print(da)
-    #print(leaves)
 
     # step 3: compute partial sums tree
     pst = partialsum_tree(x_pts, y_pts, leaves)
-    #print(pst)
 
     # return numerator of the root of pst
     return pst.data.numerator()
@@ -82,7 +92,7 @@ def interpolation(x_pts, y_pts):
 
 ########### TESTS COURS : EX VI.9 ############
 
-if True:
+if False:
     field = GF(7)
     pring.<x> = field[]
 
@@ -100,21 +110,18 @@ if True:
     t_fast = time.perf_counter() - ts
     print(f'fast={t_fast:.10f}; {P_fast}')
 
-    reset()
-
-
 ############# BENCHMARK ##############
 
-if False: 
+if True: 
     print(f'nb\tsage\t\tfast\t\tratio:s-f')
-    for k in range(2, 15):
+    for k in range(2, 14):
         n = 1 << k
         
         field = GF(next_prime(n))
         pring.<x> = field[]
 
         x_pts = distincts_elements(n, field)
-        y_pts = [field.random_element() for _ in range(n)]
+        y_pts = nonzero_elements(n, field) #[field.random_element() for _ in range(n)] 
         points =  [(x,y) for x,y in zip(x_pts,y_pts)]
 
         ts = time.perf_counter()
@@ -127,11 +134,12 @@ if False:
 
         if sage != fast:
             # print parameters for manual exec
-            print(field)
+            print("Something went wrong")
             print(x_pts, y_pts)
             print(sage)
             print(fast)
             break
+        
         print(f'{n}\t{t_sage:.10f}\t{t_fast:.10f}\t{t_sage/t_fast:.3f}')
 
     reset()
